@@ -117,6 +117,8 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement 
       // 4. Tampilkan Modal Sukses
       setShowSuccessModal(true);
 
+      setFormData(initialFormData); // Reset form setelah submit sukses
+
     } catch (error: any) {
       alert('Terjadi kesalahan: ' + error.message);
     } finally {
@@ -147,7 +149,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement 
       </div>
 
       {currentView === 'landing' ? (
-        /* ================= LANDING PAGE ================= */
+        /* LANDING PAGE */
         <div className="w-full max-w-[900px] bg-white p-8 md:p-12 rounded-[35px] shadow-[0_35px_90px_rgba(0,0,0,0.3)] relative overflow-hidden animate-[fadeIn_0.4s_ease-out]">
           <div className="absolute -bottom-[80px] -right-[80px] w-[220px] h-[220px] bg-[radial-gradient(circle,var(--tw-gradient-stops))] from-kai-orange to-transparent opacity-10 rounded-full"></div>
           
@@ -167,7 +169,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement 
 
       ) : (
 
-        /* ================= FORM PAGE ================= */
+        /* FORM PAGE */
         <div className="w-full max-w-[900px] bg-white p-8 md:p-12 rounded-[35px] shadow-[0_35px_90px_rgba(0,0,0,0.3)] relative overflow-hidden animate-[fadeIn_0.4s_ease-out]">
           <h2 className="text-[20px] font-bold text-kai-blue mb-4 pb-2 border-b-[3px] border-kai-orange inline-block">
             Formulir Pengajuan Izin
@@ -321,7 +323,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement 
         </div>
       )}
 
-      {/* ================= MODAL SUCCESS (GAYA BIMSUH) ================= */}
+      {/* MODAL SUCCESS (GAYA BIMSUH) */}
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black/65 z-50 flex items-center justify-center p-4 animate-[fadeIn_0.3s_ease]">
           <div className="bg-white p-10 md:p-14 rounded-[35px] text-center shadow-[0_40px_100px_rgba(0,0,0,0.35)] max-w-[420px] w-full relative">
