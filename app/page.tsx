@@ -55,11 +55,6 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement 
     // Kita buat salinan data sementara
     let updatedData = { ...formData, [name]: value };
 
-    // Logika 1: Jika berlibur, jam kembali otomatis 22:00
-    if (name === 'jenisPengajuan' && value === 'berlibur') {
-      updatedData.jamKembali = '22:00';
-    }
-
     // Logika 2: Validasi Tanggal (PENTING)
     if (name === 'tanggalKeluar') {
       // Jika tanggal kembali sudah diisi, DAN tanggal kembali ternyata lebih kecil dari tanggal keluar baru
@@ -280,9 +275,8 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement 
                         value={formData.jamKembali} 
                         onChange={handleChange} 
                         required 
-                        disabled={isSubmitting || formData.jenisPengajuan === 'berlibur'}
-                        className={`w-full border rounded-[12px] px-3 py-2 text-[14px] focus:outline-none focus:border-kai-blue ${(isSubmitting || formData.jenisPengajuan === 'berlibur') ? 'bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed' : 'bg-[#fafbff] border-[#e0e0e0]'}`} 
-                      />
+                        disabled={isSubmitting}
+                        className="w-full bg-[#fafbff] border border-[#e0e0e0] rounded-[12px] px-3 py-2 text-[14px] focus:outline-none focus:border-kai-blue disabled:bg-gray-100 disabled:text-gray-500"/>
                     </div>
                   </div>
                 </div>

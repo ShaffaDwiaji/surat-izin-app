@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import PizZip from 'pizzip';
 import Docxtemplater from 'docxtemplater';
+// Import library baru
+import ImageModule from 'docxtemplater-image-module-free';
+import QRCode from 'qrcode'; 
 import fs from 'fs';
 import path from 'path';
 
@@ -8,7 +11,6 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
-    // 1. Tentukan template mana yang harus dipakai berdasarkan pilihan pengguna
     let templateName = '';
     if (body.jenisPengajuan === 'keluar_kampus') {
       templateName = 'template_keluar_kampus.docx';
@@ -20,69 +22,87 @@ export async function POST(request: Request) {
       throw new Error("Jenis pengajuan tidak valid.");
     }
 
-    // 2. Cari file template di folder "templates" yang sudah kamu buat
     const templatePath = path.resolve(process.cwd(), 'templates', templateName);
-    
-    // Baca isi file template secara biner
     const content = fs.readFileSync(templatePath, 'binary');
-
-    // 3. Muat template ke dalam PizZip
     const zip = new PizZip(content);
 
-    // 4. Inisialisasi docxtemplater
+    // ==========================================
+    // LOGIKA QR CODE & IMAGE MODULE
+    // ==========================================
+    
+    // 1. Buat teks yang akan disimpan di dalam QR Code
+    const waktuTandaTangan = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
+    const qrText = `Ditandatangani secara digital oleh:\nNama: ${body.nama}\nNIPP: ${body.nipp}\nPada: ${waktuTandaTangan}\nDokumen Valid Darman Prasetyo Campus`;
+
+    // 2. Generate gambar QR Code berwujud Base64 String
+    const qrBase64DataUrl = await QRCode.toDataURL(qrText, { margin: 1, width: 150 });
+    
+    // Hilangkan awalan "data:image/png;base64," agar tersisa murni biner
+    const base64Data = qrBase64DataUrl.replace(/^data:image\/(png|jpg|jpeg);base64,/, "");
+
+    // 3. Konfigurasi Image Module untuk Docxtemplater
+    const imageOptions = {
+      centered: false, // QR tidak diletakkan di tengah secara paksa
+      getImage: function (tagValue: string) {
+        // Mengubah string base64 kembali menjadi Buffer gambar
+        return Buffer.from(tagValue, 'base64'); 
+      },
+      getSize: function () {
+        // Ukuran QR Code di dalam Word (Lebar x Tinggi dalam pixel)
+        return [64, 64]; 
+      },
+    };
+    
+    const imageModule = new ImageModule(imageOptions);
+
+    // ==========================================
+    // GENERATE DOCUMENT
+    // ==========================================
+
     const doc = new Docxtemplater(zip, {
       paragraphLoop: true,
       linebreaks: true,
+      modules: [imageModule], // Masukkan modul gambar ke sini
     });
 
-    // 5. Olah Tanggal agar menjadi Hari dan Tanggal yang terpisah
     const dateBerangkatObj = new Date(body.tanggalKeluar);
     const dateKembaliObj = new Date(body.tanggalKembali);
     
-    // Fungsi kecil untuk mendapatkan nama hari dalam bahasa Indonesia
     const getNamaHari = (date: Date) => {
       const hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
       return hari[date.getDay()];
     };
 
-    // Fungsi kecil untuk memformat tanggal (misal: 14 Mei 2026)
     const formatTanggal = (date: Date) => {
        const bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
        return `${date.getDate()} ${bulan[date.getMonth()]} ${date.getFullYear()}`;
     };
 
-    // 6. Masukkan semua data ke dalam template
     doc.render({
       nama: body.nama,
       nipp: body.nipp,
       diklat: body.diklat,
       angkatan: body.angkatan,
       noKamar: body.noKamar,
-      
-      // Data keberangkatan yang diolah
       hariKeluar: getNamaHari(dateBerangkatObj),
       tanggalKeluar: formatTanggal(dateBerangkatObj),
       jamKeluar: body.jamKeluar,
-      
       keperluan: body.keperluan,
       alamatTujuan: body.alamatTujuan,
-
-      // Data kembali yang diolah
       hariKembali: getNamaHari(dateKembaliObj),
       tanggalKembali: formatTanggal(dateKembaliObj),
       jamKembali: body.jamKembali,
+      tanggalCetak: formatTanggal(new Date()),
       
-      // Opsional jika kamu pakai {tanggalCetak}
-      tanggalCetak: formatTanggal(new Date()) 
+      // INI DIA: Masukkan data biner gambar QR ke tag {%qrPemohon}
+      qrPemohon: base64Data 
     });
 
-    // 7. Hasilkan dokumen baru (Kembali gunakan 'nodebuffer' yang paling stabil)
     const buf = doc.getZip().generate({
       type: 'nodebuffer',
       compression: 'DEFLATE',
     });
 
-    // 8. Kirim file dan beri tahu TypeScript untuk tidak perlu protes dengan "as any"
     return new NextResponse(buf as any, {
       status: 200,
       headers: {
