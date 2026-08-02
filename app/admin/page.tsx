@@ -51,7 +51,7 @@ export default function AdminDashboard() {
       <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 animate-[fadeIn_0.5s_ease-out]">
         
         {/* MODUL 1: MONITORING */}
-        <Link href="/monitoring" className="group flex flex-col bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-slate-100 border-l-[6px] border-l-emerald-500 relative overflow-hidden">
+        <Link href="/admin/monitoring" className="group flex flex-col bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-slate-100 border-l-[6px] border-l-emerald-500 relative overflow-hidden">
           <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center mb-6 text-emerald-600 group-hover:scale-110 transition-transform duration-300">
             <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
           </div>

@@ -27,7 +27,7 @@ export default function MonitoringPage() {
     setIsSubmitting(true);
 
     try {
-      // Sesuaikan dengan endpoint API monitoring-mu
+      // Sesuaikan dengan endpoint API monitoring
       const res = await fetch('/api/submit-monitoring', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -50,7 +50,7 @@ export default function MonitoringPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center py-12 px-4 font-sans text-slate-800">
       
-      {/* HEADER (Disamakan dengan Keluhan & Izin, tapi aksen Emerald/Admin) */}
+      {/* HEADER */}
       <div className="bg-white rounded-3xl py-8 px-6 md:px-10 w-full max-w-[900px] shadow-sm border border-slate-200 mb-8 relative overflow-hidden">
         <div className="absolute top-0 left-0 h-1.5 w-full bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
         <div className="flex items-center justify-between">
@@ -63,7 +63,7 @@ export default function MonitoringPage() {
             <h1 className="text-2xl md:text-3xl font-bold text-slate-800 mb-1">Manajemen Fasilitas</h1>
             <p className="text-sm md:text-base text-slate-500 font-medium">Sistem reservasi dan pemantauan penggunaan ruangan kampus</p>
           </div>
-          <div className="w-8"></div> {/* Spacer untuk keseimbangan */}
+          <div className="w-8"></div>
         </div>
       </div>
 
