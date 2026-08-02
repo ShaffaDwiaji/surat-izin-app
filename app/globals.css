@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -11,8 +15,8 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  --color-kai-blue: #2f2a78;
-  --color-kai-dark: #1f1a5a;
+  --color-kai-blue: #1a237e;
+  --color-kai-dark: #0a0f3d;
   --color-kai-orange: #f37021;
   --color-kai-light: #f4f6ff;
   --color-kai-text: #263238;

@@ -1,0 +1,308 @@
+'use client';
+
+import { useState, useEffect, FormEvent } from 'react';
+import Link from 'next/link';
+
+// Pisahkan nilai default form ke variabel agar mudah dikosongkan (reset) nanti
+const initialFormData = {
+  nama: '',
+  nipp: '',
+  telp: '',
+  diklat: '',
+  angkatan: '',
+  noKamar: '',
+  jenisPengajuan: 'keluar_kampus',
+  keperluan: '',
+  alamatTujuan: '',
+  tanggalKeluar: '',
+  jamKeluar: '',
+  tanggalKembali: '',
+  jamKembali: '',
+};
+
+export default function IzinPage() {
+  // State Data Master
+  const [masterOptions, setMasterOptions] = useState({ diklat: [], angkatan: [] });
+  const [isLoadingOptions, setIsLoadingOptions] = useState(true);
+
+  // State Form & UI/UX
+  const [formData, setFormData] = useState(initialFormData);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  // Fetch Master Data
+  useEffect(() => {
+    async function fetchMasterData() {
+      try {
+        const res = await fetch('/api/get-master-data');
+        const data = await res.json();
+        if (res.ok) {
+          setMasterOptions(data);
+        }
+      } catch (error) {
+        console.error('Gagal memuat data master', error);
+      } finally {
+        setIsLoadingOptions(false);
+      }
+    }
+    fetchMasterData();
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    let updatedData = { ...formData, [name]: value };
+
+    // Validasi Tanggal
+    if (name === 'tanggalKeluar') {
+      if (updatedData.tanggalKembali && value > updatedData.tanggalKembali) {
+        updatedData.tanggalKembali = value;
+      }
+    }
+
+    setFormData(updatedData);
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const sheetResponse = await fetch('/api/submit-izin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      if (!sheetResponse.ok) {
+        throw new Error('Gagal menyimpan data ke database.');
+      }
+
+      const docResponse = await fetch('/api/generate-doc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+
+      if (!docResponse.ok) {
+         throw new Error('Gagal mencetak dokumen.');
+      }
+
+      const blob = await docResponse.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Surat_Izin_${formData.nama.replace(/\s+/g, '_')}.docx`; 
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+
+      setShowSuccessModal(true);
+      setFormData(initialFormData);
+
+    } catch (error: any) {
+      alert('Terjadi kesalahan: ' + error.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#1a237e] to-[#0a0f3d] flex flex-col items-center py-12 px-4 font-sans text-kai-text">
+      
+      {/* HEADER (Disamakan dengan Form Keluhan) */}
+      <div className="bg-white rounded-3xl py-8 px-6 md:px-10 w-full max-w-[900px] shadow-xl mb-8 relative overflow-hidden">
+        <div className="absolute top-0 left-0 h-1.5 w-full bg-gradient-to-r from-orange-400 to-orange-600"></div>
+        <div className="flex items-center justify-between">
+          <Link href="/" className="text-slate-400 hover:text-orange-500 transition-colors">
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </Link>
+          <div className="text-center flex-1">
+            <h1 className="text-2xl md:text-3xl font-bold text-[#1a237e] mb-1">Pengajuan Izin</h1>
+            <p className="text-sm md:text-base text-gray-500 font-medium">Sistem Pengajuan Izin Keluar Kampus, Asrama, dan Berlibur</p>
+          </div>
+          <div className="w-8"></div> {/* Spacer untuk menjaga judul tetap di tengah */}
+        </div>
+      </div>
+
+      {/* FORM PAGE */}
+      <div className="w-full max-w-[900px] bg-white p-8 md:p-12 rounded-[35px] shadow-[0_35px_90px_rgba(0,0,0,0.3)] relative overflow-hidden animate-[fadeIn_0.4s_ease-out]">
+        <h2 className="text-[20px] font-bold text-kai-blue mb-4 pb-2 border-b-[3px] border-kai-orange inline-block">
+          Formulir Pengajuan Izin
+        </h2>
+
+        <form onSubmit={handleSubmit} className="mt-4 relative">
+          
+          <div className="bg-kai-light p-6 md:p-8 rounded-[28px] mt-4 border-l-[6px] border-kai-blue shadow-sm">
+            <h3 className="font-bold text-[16px] text-kai-blue mb-4">A. Data Peserta</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block font-semibold text-[14px] mb-2">Nama Lengkap</label>
+                <input type="text" name="nama" value={formData.nama} onChange={handleChange} required disabled={isSubmitting} className="w-full bg-[#fafbff] border border-[#e0e0e0] rounded-[18px] px-4 py-3 text-[14px] focus:outline-none focus:border-kai-blue focus:ring-2 focus:ring-kai-blue/20 disabled:bg-gray-100 disabled:text-gray-500" />
+              </div>
+              <div>
+                <label className="block font-semibold text-[14px] mb-2">NIPP Peserta Diklat</label>
+                <input type="text" name="nipp" value={formData.nipp} onChange={handleChange} required disabled={isSubmitting} className="w-full bg-[#fafbff] border border-[#e0e0e0] rounded-[18px] px-4 py-3 text-[14px] focus:outline-none focus:border-kai-blue focus:ring-2 focus:ring-kai-blue/20 disabled:bg-gray-100 disabled:text-gray-500" />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block font-semibold text-[14px] mb-2">No. Telepon / WA Aktif</label>
+                <input type="tel" name="telp" value={formData.telp} onChange={handleChange} required disabled={isSubmitting} className="w-full bg-[#fafbff] border border-[#e0e0e0] rounded-[18px] px-4 py-3 text-[14px] focus:outline-none focus:border-kai-blue focus:ring-2 focus:ring-kai-blue/20 disabled:bg-gray-100 disabled:text-gray-500" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-kai-light p-6 md:p-8 rounded-[28px] mt-6 border-l-[6px] border-kai-orange shadow-sm">
+            <h3 className="font-bold text-[16px] text-kai-blue mb-4">B. Detail Pendidikan & Kamar</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label className="block font-semibold text-[14px] mb-2">Diklat</label>
+                <select name="diklat" value={formData.diklat} onChange={handleChange} required disabled={isSubmitting} className="w-full bg-[#fafbff] border border-[#e0e0e0] rounded-[18px] px-4 py-3 text-[14px] focus:outline-none focus:border-kai-orange focus:ring-2 focus:ring-kai-orange/20 cursor-pointer disabled:bg-gray-100 disabled:text-gray-500">
+                  <option value="">{isLoadingOptions ? 'Memuat data...' : 'Pilih Diklat...'}</option>
+                  {masterOptions.diklat.map((item, index) => (
+                    <option key={index} value={item as string}>{item}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block font-semibold text-[14px] mb-2">Angkatan (Akt)</label>
+                <select name="angkatan" value={formData.angkatan} onChange={handleChange} required disabled={isSubmitting} className="w-full bg-[#fafbff] border border-[#e0e0e0] rounded-[18px] px-4 py-3 text-[14px] focus:outline-none focus:border-kai-orange focus:ring-2 focus:ring-kai-orange/20 cursor-pointer disabled:bg-gray-100 disabled:text-gray-500">
+                  <option value="">{isLoadingOptions ? 'Memuat data...' : 'Pilih Angkatan...'}</option>
+                  {masterOptions.angkatan.map((item, index) => (
+                    <option key={index} value={item as string}>{item}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block font-semibold text-[14px] mb-2">No. Kamar Asrama</label>
+                <input type="text" name="noKamar" value={formData.noKamar} onChange={handleChange} required disabled={isSubmitting} placeholder="" className="w-full bg-[#fafbff] border border-[#e0e0e0] rounded-[18px] px-4 py-3 text-[14px] focus:outline-none focus:border-kai-orange focus:ring-2 focus:ring-kai-orange/20 disabled:bg-gray-100 disabled:text-gray-500" />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-kai-light p-6 md:p-8 rounded-[28px] mt-6 border-l-[6px] border-kai-blue shadow-sm">
+            <h3 className="font-bold text-[16px] text-kai-blue mb-4">C. Detail Keperluan Izin</h3>
+            
+            <div className="flex flex-col md:flex-row gap-4 mb-6 p-4 bg-white rounded-xl border border-gray-200">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="jenisPengajuan" value="keluar_kampus" checked={formData.jenisPengajuan === 'keluar_kampus'} onChange={handleChange} disabled={isSubmitting} className="w-5 h-5 accent-kai-blue" />
+                <span className="font-semibold text-[14px]">Izin Keluar Kampus</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="jenisPengajuan" value="keluar_asrama" checked={formData.jenisPengajuan === 'keluar_asrama'} onChange={handleChange} disabled={isSubmitting} className="w-5 h-5 accent-kai-blue" />
+                <span className="font-semibold text-[14px]">Izin Keluar Asrama</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="radio" name="jenisPengajuan" value="berlibur" checked={formData.jenisPengajuan === 'berlibur'} onChange={handleChange} disabled={isSubmitting} className="w-5 h-5 accent-kai-orange" />
+                <span className="font-semibold text-[14px]">Izin Berlibur (Bermalam)</span>
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <div className="p-4 bg-white rounded-xl border border-gray-100">
+                <h4 className="font-bold text-[13px] text-gray-500 mb-3 uppercase tracking-wider">Waktu Meninggalkan</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[13px] mb-1">Tanggal Keluar</label>
+                    <input type="date" name="tanggalKeluar" value={formData.tanggalKeluar} onChange={handleChange} required disabled={isSubmitting} className="w-full bg-[#fafbff] border border-[#e0e0e0] rounded-[12px] px-3 py-2 text-[14px] focus:outline-none focus:border-kai-blue disabled:bg-gray-100 disabled:text-gray-500" />
+                  </div>
+                  <div>
+                    <label className="block text-[13px] mb-1">Pukul Berangkat</label>
+                    <input type="time" name="jamKeluar" value={formData.jamKeluar} onChange={handleChange} required disabled={isSubmitting} className="w-full bg-[#fafbff] border border-[#e0e0e0] rounded-[12px] px-3 py-2 text-[14px] focus:outline-none focus:border-kai-blue disabled:bg-gray-100 disabled:text-gray-500" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-white rounded-xl border border-gray-100">
+                <h4 className="font-bold text-[13px] text-gray-500 mb-3 uppercase tracking-wider">Waktu Kembali</h4>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-[13px] mb-1">Tanggal Kembali</label>
+                    <input 
+                      type="date" 
+                      name="tanggalKembali" 
+                      value={formData.tanggalKembali} 
+                      onChange={handleChange} 
+                      required 
+                      disabled={isSubmitting} 
+                      min={formData.tanggalKeluar}
+                      className="w-full bg-[#fafbff] border border-[#e0e0e0] rounded-[12px] px-3 py-2 text-[14px] focus:outline-none focus:border-kai-blue disabled:bg-gray-100 disabled:text-gray-500"/>
+                  </div>
+                  <div>
+                    <label className="block text-[13px] mb-1">Pukul Kembali</label>
+                    <input 
+                      type="time" 
+                      name="jamKembali" 
+                      value={formData.jamKembali} 
+                      onChange={handleChange} 
+                      required 
+                      disabled={isSubmitting}
+                      className="w-full bg-[#fafbff] border border-[#e0e0e0] rounded-[12px] px-3 py-2 text-[14px] focus:outline-none focus:border-kai-blue disabled:bg-gray-100 disabled:text-gray-500"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block font-semibold text-[14px] mb-2">Keperluan Secara Detail</label>
+                <textarea name="keperluan" value={formData.keperluan} onChange={handleChange} required disabled={isSubmitting} rows={2} placeholder="Jelaskan keperluan Anda secara spesifik..." className="w-full bg-[#fafbff] border border-[#e0e0e0] rounded-[18px] px-4 py-3 text-[14px] focus:outline-none focus:border-kai-blue focus:ring-2 focus:ring-kai-blue/20 resize-none disabled:bg-gray-100 disabled:text-gray-500" />
+              </div>
+              <div>
+                <label className="block font-semibold text-[14px] mb-2">Alamat Tujuan Secara Lengkap</label>
+                <textarea name="alamatTujuan" value={formData.alamatTujuan} onChange={handleChange} required disabled={isSubmitting} rows={2} placeholder="Sebutkan alamat lengkap tempat tujuan..." className="w-full bg-[#fafbff] border border-[#e0e0e0] rounded-[18px] px-4 py-3 text-[14px] focus:outline-none focus:border-kai-blue focus:ring-2 focus:ring-kai-blue/20 resize-none disabled:bg-gray-100 disabled:text-gray-500" />
+              </div>
+            </div>
+          </div>
+
+          {/* Tombol Action (Penuh) */}
+          <div className="pt-8">
+            <button 
+              type="submit" 
+              disabled={isSubmitting}
+              className={`w-full py-[16px] rounded-[22px] text-[15px] font-bold transition-all duration-250 shadow-lg ${isSubmitting ? 'bg-gray-400 cursor-not-allowed text-gray-200 transform-none shadow-none' : 'bg-gradient-to-r from-kai-blue to-[#4238a6] text-white hover:-translate-y-1'}`}
+            >
+              {isSubmitting ? 'Menyimpan...' : 'Proses Dokumen'}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* MODAL SUCCESS */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/65 z-50 flex items-center justify-center p-4 animate-[fadeIn_0.3s_ease]">
+          <div className="bg-white p-10 md:p-14 rounded-[35px] text-center shadow-[0_40px_100px_rgba(0,0,0,0.35)] max-w-[420px] w-full relative">
+            
+            {/* Lingkaran Checkmark Orange */}
+            <div className="w-[100px] h-[100px] rounded-full bg-kai-orange flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            
+            <h2 className="text-[24px] font-bold text-kai-blue mb-4">Pengajuan Berhasil!</h2>
+            <p className="text-gray-500 mb-8 leading-relaxed">
+              Data perizinan Anda telah tercatat ke dalam sistem. Dokumen surat izin akan segera diproses.
+            </p>
+            
+            <button 
+              onClick={() => setShowSuccessModal(false)}
+              className="bg-kai-blue text-white w-full py-[14px] rounded-[22px] font-bold text-[15px] hover:opacity-90 hover:-translate-y-1 transition-all duration-250"
+            >
+              Tutup & Isi Form Lagi
+            </button>
+          </div>
+        </div>
+      )}
+
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}} />
+    </div>
+  );
+}
