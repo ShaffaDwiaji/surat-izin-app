@@ -2,8 +2,8 @@ import React from 'react';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Monitoring Fasilitas | Darman Prasetyo',
-  description: 'Sistem Reservasi & Penggunaan Ruang Darman Prasetyo Campus',
+  title: "Portal Digital Campus - Darman Prasetyo",
+  description: "Sistem Layanan Terpadu Darman Prasetyo Campus",
 };
 
 export default function MonitoringLayout({

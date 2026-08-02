@@ -58,7 +58,7 @@ export default function AdminDashboard() {
           <h2 className="text-xl font-bold text-slate-800 mb-2">Manajemen Fasilitas</h2>
           <p className="text-slate-500 text-sm leading-relaxed mb-6 flex-grow">Kelola reservasi ruangan dan monitoring penggunaan fasilitas area kampus.</p>
           <div className="text-emerald-600 font-bold text-sm flex items-center">
-            Buka Modul 
+            Buka Modul Manajemen Fasilitas
             <svg className="w-4 h-4 ml-1 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
           </div>
         </Link>
@@ -71,7 +71,21 @@ export default function AdminDashboard() {
           <h2 className="text-xl font-bold text-slate-800 mb-2">Tindak Lanjut Keluhan</h2>
           <p className="text-slate-500 text-sm leading-relaxed mb-6 flex-grow">Pantau laporan keluhan siswa dan perbarui status penanganannya.</p>
           <div className="text-red-600 font-bold text-sm flex items-center">
-            Buka Modul
+            Buka Modul Tindak Lanjut
+            <svg className="w-4 h-4 ml-1 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+          </div>
+        </Link>
+
+        {/* MODUL 3: GUDANG (ATPSM) */}
+        <Link href="/admin/gudang" className="group flex flex-col bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-slate-100 border-l-[6px] border-l-blue-500 relative overflow-hidden">
+          <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 text-blue-600 group-hover:scale-110 transition-transform duration-300">
+            {/* Ikon Box / Gudang */}
+            <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+          </div>
+          <h2 className="text-xl font-bold text-slate-800 mb-2">Sistem Gudang (ATPSM)</h2>
+          <p className="text-slate-500 text-sm leading-relaxed mb-6 flex-grow">Kelola Arus, Terima, Pindah, Simpan, dan Muat aset logistik kampus.</p>
+          <div className="text-blue-600 font-bold text-sm flex items-center">
+            Buka Modul Gudang
             <svg className="w-4 h-4 ml-1 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
           </div>
         </Link>
