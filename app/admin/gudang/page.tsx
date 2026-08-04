@@ -83,6 +83,8 @@ export default function GudangPage() {
       case 'Elektronik': return 'ELK';
       case 'Kebersihan': return 'KBR';
       case 'Fasilitas Asrama': return 'ASR';
+      case 'Makanan' : return 'MKN';
+      case 'Minuman' : return 'MNM';
       default: return 'UMM';
     }
   };
@@ -245,6 +247,8 @@ export default function GudangPage() {
                     <option value="Elektronik">Elektronik</option>
                     <option value="Kebersihan">Kebersihan</option>
                     <option value="Fasilitas Asrama">Fasilitas Asrama</option>
+                    <option value="Makanan">Makanan</option>
+                    <option value="Minuman">Minuman</option>
                     <option value="Lainnya">Lainnya</option>
                   </select>
                 </div>

@@ -78,6 +78,7 @@ export default function KeluhanPage() {
                 <option value="Fasilitas Kamar">Fasilitas Kamar Asrama</option>
                 <option value="Fasilitas Kelas">Fasilitas Kelas / Ruang Belajar</option>
                 <option value="Kebersihan">Kebersihan Area</option>
+                <option value="Makanan dan Minuman">Menu Makanan dan Minuman</option>
                 <option value="Fasilitas Umum">Fasilitas Umum (Kamar Mandi, dll)</option>
                 <option value="Lainnya">Lainnya</option>
               </select>
