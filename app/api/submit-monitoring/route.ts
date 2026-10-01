@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const waktuRequest = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' });
 
     // Menyimpan array checkbox menjadi string (contoh: "Aula, 204, Simulator")
-    const kelasString = body.kebutuhanKelas.join(', ');
+    const ruanganString = body.kebutuhanRuangan.join(', ');
 
     await sheet.addRow({
       'Tanggal Request': waktuRequest,
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
       'Nama Kegiatan': body.namaKegiatan,
       'Tanggal Mulai': body.tanggalMulai,
       'Tanggal Selesai': body.tanggalSelesai,
-      'Kebutuhan Kelas': kelasString,
+      'Kebutuhan Ruangan': ruanganString,
       'Jumlah Peserta': body.jumlahPeserta,
       'Jumlah Hari': body.jumlahHari,
       'Keterangan': body.keterangan || '-',
